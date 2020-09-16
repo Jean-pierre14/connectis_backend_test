@@ -1,9 +1,10 @@
 const exp = require('express')
 const jwt = require('jsonwebtoken')
 const router = exp.Router()
-
+const cors = require('cors')
 const Users = require('./utilisateur')
 const Cartes = require('./carte')
+const carte = require('./carte')
 
 // GET /
 router.get('/', async (req, res) => {
@@ -45,7 +46,7 @@ router.delete('/delete/user/:id', async (req, res) => {
 })
 
 // Update the user
-router.put('/update/user/:id', async (req, res) => {
+router.put('/update/user/:id', verifyToken, async (req, res) => {
     if(!req.params.id){
         res.status(400)
         res.json({message: 'Bad data'})
@@ -67,16 +68,17 @@ router.put('/update/user/:id', async (req, res) => {
 
 function verifyToken (req, res, next) {
     // Get auth header value
-    const bearerHeader = req.headers['autorization']
+    let bearerHeader = req.headers['authorization'];
+
     // check if bearer is undefined
-    if (typeof bearerHeader !== 'undefined') {
+    if (typeof(bearerHeader) !== 'undefined') {
         // Split at the espace
-        const bearer = bearerHeader.split(' ')
+        let bearer = bearerHeader.split(' ')
         // Get token from array
-        const beareToken = bearer[1]
+        let bearerToken = bearer[1]
+        console.log(bearerToken)
         // Set the token
-        // req.token = bearerToken
-        beareToken = req.token
+        req.token = bearerToken
         next()
     } else {
         // Forbidden
@@ -100,7 +102,7 @@ router.get('/get/token', (req, res) => {
 })
 
 // Shoppping cards
-router.post('/buy', verifyToken, (req, res) =>{
+router.post('/buy', verifyToken, (req, res) => {
     jwt.verify(req.token, 'secretkey', (err, authData) => {
         if(err) res.sendStatus(403)
         res.json({message: 'Welcome to connectis shop', authData})
@@ -119,28 +121,38 @@ router.get('/buy', async (req, res) => {
 
 // Achat d'une carte
 router.post('/oneCarte', async (req, res) => {
-    const Me = { id: 3, nom: "Grace", prenom: "Jean-pierre14", telephone: "+243976353543", password: "123456789"}
+
+    // const Me = { id: 3, nom: "Grace", prenom: "Jean-pierre14", telephone: "+243976353543", password: "123456789"};
     try{
-        const cartes = await Cartes.findAll()
-        res.json("Choisi une carte "+cartes)
-        if(!req.body.carte){
-            res.json('Veille choisir une carte')
-        }else{
-            res.json('Achete')
-        }
+        const one = await Cartes.create()
+        res.json('Card payed')
     }catch(err){
-        res.json({message: `Error ${err}`})
+        res.json({message: `Error: ${err}`})
     }
+    carte.create()
+    .then(()=>{
+        res.json('Card payd')
+    }).catch(err => {
+        res.json({message: `Error ${err}`})
+    })
 })
 
 // To check fidele
-router.get('/', (req, res) => {
-    res.json('Select from the view (userfidelite)')
+router.get('/fidelite/:id', async (req, res) => {
+    // SQL Code : SELECT SUM(prix) AS fidelite FROM co_operation WHERE recepteur = `this.id`
+    let Id = parseInt(req.params.id)
+    try{
+        const user = await Users.findOne({where:{id: Id}})
+        res.json(user)
+        console.log(user)
+    }catch(err){
+        res.json({message: `Error: ${err}`})
+    }
 })
 
 // Achat de plusieur carte
 router.get('/manyCards', (req, res) => {
-    
+
     let meCartes = req.body.carte.split(" ");
 
     for(let i = 0; i < meCartes.length; i++) { 
