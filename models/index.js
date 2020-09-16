@@ -1,7 +1,9 @@
 const exp = require('express')
+const jwt = require('jsonwebtoken')
 const router = exp.Router()
 
 const Users = require('./utilisateur')
+const Cartes = require('./carte')
 
 // GET /
 router.get('/', async (req, res) => {
@@ -11,26 +13,6 @@ router.get('/', async (req, res) => {
     }catch(err){
         res.json({message: `Error ${err}`})
     }
-})
-
-router.get('/api/token', (req, res) => {
-    const user = {
-        id: 1,
-        username: 'Grace',
-        email: 'chiruza@gmail.com'
-    }
-    jwt.sign({user}, 'secretkey', (err, token) => {
-        res.json({
-            token
-        })
-    })
-})
-
-router.post('/api/buy', verifyToken, (req, res) =>{
-    jwt.verify(req.token, 'secretkey', (err, authData) => {
-        if(err) res.sendStatus(403)
-        res.json({message: 'Welcome to connectis shop', authData})
-    })
 })
 
 // Registration of the user
@@ -93,12 +75,83 @@ function verifyToken (req, res, next) {
         // Get token from array
         const beareToken = bearer[1]
         // Set the token
-        req.token = bearerToken
+        // req.token = bearerToken
+        beareToken = req.token
         next()
     } else {
         // Forbidden
         res.sendStatus(403)
     }
 }
+
+// Cartes shoopping
+// Get the token
+router.get('/get/token', (req, res) => {
+    const user = {
+        id: 1,
+        username: 'Grace',
+        email: 'chiruza@gmail.com'
+    }
+    jwt.sign({user}, 'secretkey', (err, token) => {
+        res.json({
+            token
+        })
+    })
+})
+
+// Shoppping cards
+router.post('/buy', verifyToken, (req, res) =>{
+    jwt.verify(req.token, 'secretkey', (err, authData) => {
+        if(err) res.sendStatus(403)
+        res.json({message: 'Welcome to connectis shop', authData})
+    })
+})
+
+// Get a card 
+router.get('/buy', async (req, res) => {
+    try{
+        const cartes = await Cartes.findAll()
+        res.json(cartes)
+    }catch(err){
+        res.json({message: `Error ${err}`})
+    }
+})
+
+// Achat d'une carte
+router.post('/oneCarte', async (req, res) => {
+    const Me = { id: 3, nom: "Grace", prenom: "Jean-pierre14", telephone: "+243976353543", password: "123456789"}
+    try{
+        const cartes = await Cartes.findAll()
+        res.json("Choisi une carte "+cartes)
+        if(!req.body.carte){
+            res.json('Veille choisir une carte')
+        }else{
+            res.json('Achete')
+        }
+    }catch(err){
+        res.json({message: `Error ${err}`})
+    }
+})
+
+// To check fidele
+router.get('/', (req, res) => {
+    res.json('Select from the view (userfidelite)')
+})
+
+// Achat de plusieur carte
+router.get('/manyCards', (req, res) => {
+    
+    let meCartes = req.body.carte.split(" ");
+
+    for(let i = 0; i < meCartes.length; i++) { 
+        meCartes[i] = +meCartes[i];
+    }
+
+    if(!req.body.carte){
+        res.json('Vous n\'avez pas encore choisi')
+    }else{
+        res.json(meCartes)
+    }
+})
 
 module.exports = router
