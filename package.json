@@ -1,0 +1,29 @@
+{
+  "name": "connectistest",
+  "version": "1.0.0",
+  "description": "connectis test Goma",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "connectis": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jean-pierre14/connectis_backend_test.git"
+  },
+  "author": "Grace el Bisimwa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jean-pierre14/connectis_backend_test/issues"
+  },
+  "homepage": "https://github.com/Jean-pierre14/connectis_backend_test#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "consola": "^2.15.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.1.0",
+    "sequelize": "^6.3.5"
+  }
+}
